@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.xiaohunao.mine_team.common.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "mine_team.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "ImageButtonAccessor",
+    "InventoryScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
