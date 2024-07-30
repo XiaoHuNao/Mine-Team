@@ -16,8 +16,11 @@ public class NetworkRegister {
     @SubscribeEvent
     public static void registerPayload(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar(VERSION);
-        registrar.playToServer(TeamPvPSyncPayload.NETWORK_TYPE, TeamPvPSyncPayload.STREAM_CODEC, TeamPvPSyncPayload::ServerHandle);
-        registrar.playBidirectional(TeamColorSyncPayload.NETWORK_TYPE, TeamColorSyncPayload.STREAM_CODEC, new DirectionalPayloadHandler<>(
+        registrar.playBidirectional(TeamPvPSyncPayload.TYPE, TeamPvPSyncPayload.STREAM_CODEC, new DirectionalPayloadHandler<>(
+                TeamPvPSyncPayload::clientHandle,
+                TeamPvPSyncPayload::serverHandle
+        ));
+        registrar.playBidirectional(TeamColorSyncPayload.TYPE, TeamColorSyncPayload.STREAM_CODEC, new DirectionalPayloadHandler<>(
                 TeamColorSyncPayload::clientHandle,
                 TeamColorSyncPayload::serverHandle
         ));

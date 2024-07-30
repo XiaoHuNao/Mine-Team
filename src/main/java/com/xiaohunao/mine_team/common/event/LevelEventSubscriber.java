@@ -3,6 +3,7 @@ package com.xiaohunao.mine_team.common.event;
 import com.xiaohunao.mine_team.MineTeam;
 
 import com.xiaohunao.mine_team.common.network.TeamColorSyncPayload;
+import com.xiaohunao.mine_team.common.network.TeamPvPSyncPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.ServerScoreboard;
@@ -36,22 +37,4 @@ public class LevelEventSubscriber {
                     team.setDisplayName(Component.translatable(MineTeam.asResourceKey("team." + name)));
                 });
     }
-    @SubscribeEvent
-    public static void onPlayerLoggedInEvent(PlayerEvent.PlayerLoggedInEvent event) {
-        Player player = event.getEntity();
-        ServerLevel level = (ServerLevel)player.level();
-        Scoreboard scoreboard = level.getServer().getScoreboard();
-        PlayerTeam team = scoreboard.getPlayersTeam(player.getScoreboardName());
-        if (team == null) {
-            PlayerTeam playerTeam = scoreboard.getPlayerTeam("white");
-            if (playerTeam != null) {
-                scoreboard.addPlayerToTeam(player.getScoreboardName(), playerTeam);
-                player.getPersistentData().putString("teamColor", "white");
-                PacketDistributor.sendToPlayer((ServerPlayer) player, new TeamColorSyncPayload("white"));
-            }
-        }
-    }
-
-
-
 }

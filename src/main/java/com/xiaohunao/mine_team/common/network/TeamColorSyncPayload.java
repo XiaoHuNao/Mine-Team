@@ -16,14 +16,17 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record TeamColorSyncPayload(String newTeamColor) implements CustomPacketPayload {
-    public static final Type<TeamColorSyncPayload> NETWORK_TYPE = new Type<>(MineTeam.asResource("sync_color"));
+    public static final Type<TeamColorSyncPayload> TYPE = new Type<>(MineTeam.asResource("sync_color"));
     public static final StreamCodec<ByteBuf, TeamColorSyncPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, TeamColorSyncPayload::newTeamColor,
             TeamColorSyncPayload::new
     );
-    public static void serverHandle(TeamColorSyncPayload data, IPayloadContext context) {
+    public static void serverHandle(final TeamColorSyncPayload data, final IPayloadContext context) {
         context.enqueueWork(() ->{
             ServerPlayer player = (ServerPlayer) context.player();
+
+            player.getPersistentData().putString("teamColor", data.newTeamColor());
+
             MinecraftServer server = player.level().getServer();
             if (server != null) {
                 ServerScoreboard scoreboard = server.getScoreboard();
@@ -36,12 +39,11 @@ public record TeamColorSyncPayload(String newTeamColor) implements CustomPacketP
                     }
                 }
             }
-            player.getPersistentData().putString("teamColor", data.newTeamColor());
         });
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public static void clientHandle(TeamColorSyncPayload payload, IPayloadContext context) {
+
+    public static void clientHandle(final TeamColorSyncPayload payload,final IPayloadContext context) {
         context.enqueueWork(() -> {
             LocalPlayer localPlayer = (LocalPlayer) context.player();
             localPlayer.getPersistentData().putString("teamColor", payload.newTeamColor());
@@ -51,6 +53,6 @@ public record TeamColorSyncPayload(String newTeamColor) implements CustomPacketP
     @Override
     @NotNull
     public Type<? extends CustomPacketPayload> type() {
-        return NETWORK_TYPE;
+        return TYPE;
     }
 }

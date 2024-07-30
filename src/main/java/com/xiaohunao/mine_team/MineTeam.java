@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 @Mod(MineTeam.MOD_ID)
 public class MineTeam {
     public static final String MOD_ID = "mine_team";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
     public MineTeam(IEventBus modEventBus, ModContainer modContainer) {
 //        NeoForge.EVENT_BUS.register(this);
     }

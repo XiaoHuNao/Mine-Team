@@ -9,6 +9,8 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -53,7 +55,10 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
 
     @Inject(method = "init", at = @At("RETURN"))
     private void init(CallbackInfo info) {
-        String teamColor = this.minecraft.player.getPersistentData().getString("teamColor");
+        CompoundTag tag = this.minecraft.player.getPersistentData();
+        String teamColor = tag.getString("teamColor");
+        boolean teamPvP = tag.getBoolean("teamPvP");
+
         int iconSize = 16;
         int off = 6;
 
@@ -80,12 +85,14 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
         this.teamPVPOn = new ImageButton(this.leftPos - iconSize,this.topPos + iconSize + off, iconSize, iconSize, teamPVPOnSprites,  button-> {
             team$setFriendlyFire(false);
         });
-        this.teamPVPOn.visible = false;
+        team$isFriendlyFire();
         this.addRenderableWidget(this.teamIcon);
         this.addRenderableWidget(this.teamPVPOff);
         this.addRenderableWidget(this.teamPVPOn);
         team$initIcon();
     }
+
+
 
     @Inject(method = "render", at = @At("HEAD"))
     private void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
@@ -190,17 +197,23 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
                 MineTeam.asResource("team/pvp/" + teamColor + "_pvp_off"), MineTeam.asResource("team/pvp/" + teamColor + "_pvp_off")
         ));
         this.teamIcon.visible = true;
-        this.teamPVPOn.visible = false;
-        this.teamPVPOff.visible = true;
+        team$isFriendlyFire();
         team$visibleTeamSmallIcon(false);
     }
 
     @Unique
     public void team$setFriendlyFire(boolean friendlyFire) {
-        String teamColor = this.minecraft.player.getPersistentData().getString("teamColor");
-        PacketDistributor.sendToServer(new TeamPvPSyncPayload(teamColor, friendlyFire));
+        PacketDistributor.sendToServer(new TeamPvPSyncPayload(friendlyFire));
+        this.minecraft.player.getPersistentData().putBoolean("teamPvP", friendlyFire);
         this.teamPVPOn.visible = friendlyFire;
         this.teamPVPOff.visible = !friendlyFire;
+    }
+
+    @Unique
+    private void team$isFriendlyFire() {
+        boolean teamPvP = this.minecraft.player.getPersistentData().getBoolean("teamPvP");
+        this.teamPVPOn.visible = teamPvP;
+        this.teamPVPOff.visible = !teamPvP;
     }
 
     @Unique
