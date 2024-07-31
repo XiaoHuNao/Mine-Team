@@ -1,11 +1,9 @@
 package com.xiaohunao.mine_team.common.event;
 
 import com.xiaohunao.mine_team.MineTeam;
+import com.xiaohunao.mine_team.common.mixed.PlayerTeamMixed;
 import com.xiaohunao.mine_team.common.network.TeamColorSyncPayload;
 import com.xiaohunao.mine_team.common.network.TeamPvPSyncPayload;
-import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.Tag;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,7 +17,6 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -53,7 +50,7 @@ public class PlayerEventSubscriber {
     }
 
     @SubscribeEvent
-    public static void onLivingDamage(LivingIncomingDamageEvent event) {
+    public static void onLivingPvP(LivingIncomingDamageEvent event) {
         LivingEntity hurtEntity = event.getEntity();
         DamageSource source = event.getSource();
         Entity attackEntity = source.getEntity();
@@ -71,14 +68,23 @@ public class PlayerEventSubscriber {
             }
         }
     }
-
     @SubscribeEvent
-    public static void onPlayerInteractRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        Level level = event.getLevel();
-        InteractionHand hand = event.getHand();
-        Player player = event.getEntity();
-        if (level.isClientSide() || hand != InteractionHand.MAIN_HAND) {
-            return;
+    public static void onSetTeamLastHurtMob(LivingIncomingDamageEvent event) {
+        LivingEntity hurtEntity = event.getEntity();
+        DamageSource source = event.getSource();
+        Entity attackEntity = source.getEntity();
+        if (hurtEntity.level() instanceof ServerLevel serverLevel && attackEntity != null){
+            ServerScoreboard scoreboard = serverLevel.getServer().getScoreboard();
+            PlayerTeam attackEntityTeam = scoreboard.getPlayersTeam(attackEntity.getScoreboardName());
+            PlayerTeam hurtEntityTeam = scoreboard.getPlayersTeam(hurtEntity.getScoreboardName());
+            if (attackEntity instanceof Player player && attackEntityTeam instanceof PlayerTeamMixed playerTeamMixed){
+                playerTeamMixed.setLastHurtMob(hurtEntity);
+                playerTeamMixed.setLastHurtTeam(hurtEntityTeam);
+            }
+            if (hurtEntity instanceof Player player && hurtEntityTeam instanceof PlayerTeamMixed playerTeamMixed){
+                playerTeamMixed.setLastHurtMob(attackEntity);
+                playerTeamMixed.setLastHurtTeam(attackEntityTeam);
+            }
         }
     }
 
@@ -90,7 +96,14 @@ public class PlayerEventSubscriber {
         if (level.isClientSide() || hand != InteractionHand.MAIN_HAND) {
             return;
         }
-        Entity target = event.getTarget();
-        System.out.println(target.getPersistentData().getBoolean("teamPVP"));
+
+        if (player.isShiftKeyDown()){
+            Entity target = event.getTarget();
+            ServerLevel serverLevel = (ServerLevel) level;
+            ServerScoreboard scoreboard = serverLevel.getServer().getScoreboard();
+            scoreboard.addPlayerToTeam(target.getScoreboardName(), scoreboard.getPlayerTeam("white"));
+            System.out.println("add" + target + "to red team");
+            target.setGlowingTag(true);
+        }
     }
 }
