@@ -10,6 +10,7 @@
     "ServerScoreboardMixin"
   ],
   "client": [
+    "CreativeModeInventoryScreenMixin",
     "ImageButtonAccessor",
     "InventoryScreenMixin"
   ],

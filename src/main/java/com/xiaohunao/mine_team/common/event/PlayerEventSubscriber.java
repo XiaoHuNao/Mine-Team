@@ -17,6 +17,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -68,6 +69,23 @@ public class PlayerEventSubscriber {
             }
         }
     }
+
+    @SubscribeEvent
+    public static void onPlayerCloneEvent(PlayerEvent.Clone event) {
+        Player entity = event.getEntity();
+        Player original = event.getOriginal();
+        if (event.isWasDeath() && !entity.level().isClientSide()) {
+            String teamColor = original.getPersistentData().getString("teamColor");
+            boolean teamPvP = original.getPersistentData().getBoolean("teamPvP");
+            entity.getPersistentData().putString("teamColor", teamColor);
+            entity.getPersistentData().putBoolean("teamPvP", teamPvP);
+            PacketDistributor.sendToPlayer((ServerPlayer) entity, new TeamColorSyncPayload(teamColor));
+            PacketDistributor.sendToPlayer((ServerPlayer) entity, new TeamPvPSyncPayload(teamPvP));
+        }
+    }
+
+
+
     @SubscribeEvent
     public static void onSetTeamLastHurtMob(LivingIncomingDamageEvent event) {
         LivingEntity hurtEntity = event.getEntity();
