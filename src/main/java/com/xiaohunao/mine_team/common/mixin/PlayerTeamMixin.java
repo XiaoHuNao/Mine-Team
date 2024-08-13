@@ -1,7 +1,7 @@
 package com.xiaohunao.mine_team.common.mixin;
 
 import com.xiaohunao.mine_team.common.mixed.PlayerTeamMixed;
-import net.minecraft.client.Minecraft;
+
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.scores.PlayerTeam;
@@ -58,7 +58,7 @@ public class PlayerTeamMixin implements PlayerTeamMixed {
             this.lastHurtMob = null;
         }
 
-        this.lastHurtMobTimestamp = Minecraft.getInstance().level.getGameTime();
+        this.lastHurtMobTimestamp = entity.level().getGameTime();
     }
 
 }
