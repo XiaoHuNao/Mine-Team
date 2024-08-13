@@ -1,14 +1,19 @@
 package com.xiaohunao.mine_team;
 
 import com.mojang.logging.LogUtils;
+import com.xiaohunao.mine_team.common.config.MineTeamConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
 @Mod(MineTeam.MOD_ID)
@@ -17,6 +22,8 @@ public class MineTeam {
     public static final Logger LOGGER = LogUtils.getLogger();
     public MineTeam(IEventBus modEventBus, ModContainer modContainer) {
 //        NeoForge.EVENT_BUS.register(this);
+        modEventBus.addListener(this::onFMLCommonSetup);
+        modContainer.registerConfig(ModConfig.Type.COMMON, MineTeamConfig.CONFIG, "mine_team.toml");
     }
 
     public static ResourceLocation asResource(String path) {
@@ -26,6 +33,10 @@ public class MineTeam {
         return MOD_ID + "." + path;
     }
 
+    @SubscribeEvent
+    public void onFMLCommonSetup(FMLCommonSetupEvent event) {
+        MineTeamConfig.loadTamingMaterials();
+    }
 
 
     @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

@@ -1,6 +1,7 @@
 package com.xiaohunao.mine_team.common.init;
 
 import com.xiaohunao.mine_team.MineTeam;
+import com.xiaohunao.mine_team.common.network.MobTamingS2CPayload;
 import com.xiaohunao.mine_team.common.network.TeamColorSyncPayload;
 import com.xiaohunao.mine_team.common.network.TeamPvPSyncPayload;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -24,5 +25,6 @@ public class NetworkRegister {
                 TeamColorSyncPayload::clientHandle,
                 TeamColorSyncPayload::serverHandle
         ));
+        registrar.playToClient(MobTamingS2CPayload.TYPE, MobTamingS2CPayload.STREAM_CODEC, MobTamingS2CPayload::clientHandle);
     }
 }
