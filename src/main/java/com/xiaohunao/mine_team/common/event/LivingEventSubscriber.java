@@ -70,6 +70,9 @@ public class LivingEventSubscriber {
             ServerScoreboard scoreboard = serverLevel.getServer().getScoreboard();
             PlayerTeam attackEntityTeam = scoreboard.getPlayersTeam(attackEntity.getScoreboardName());
             PlayerTeam hurtEntityTeam = scoreboard.getPlayersTeam(hurtEntity.getScoreboardName());
+            if (attackEntity == hurtEntity){
+                return;
+            }
             if (hurtEntityTeam == null || attackEntityTeam == null ||hurtEntityTeam != attackEntityTeam) {
                 return;
             }
