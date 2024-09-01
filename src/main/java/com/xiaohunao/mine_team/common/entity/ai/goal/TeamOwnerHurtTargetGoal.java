@@ -1,7 +1,7 @@
 package com.xiaohunao.mine_team.common.entity.ai.goal;
 
-import com.xiaohunao.mine_team.common.mixed.PlayerTeamMixed;
 import com.xiaohunao.mine_team.common.mixed.MobMixed;
+import com.xiaohunao.mine_team.common.mixed.PlayerTeamMixed;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;

@@ -1,6 +1,5 @@
 package com.xiaohunao.mine_team.common.event;
 
-import com.mojang.serialization.JsonOps;
 import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.config.MineTeamConfig;
 import com.xiaohunao.mine_team.common.mixed.PlayerTeamMixed;
@@ -10,29 +9,19 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-
-import java.util.Objects;
 
 @EventBusSubscriber(modid = MineTeam.MOD_ID)
 public class LivingEventSubscriber {
@@ -46,7 +35,7 @@ public class LivingEventSubscriber {
         }
         PacketDistributor.sendToPlayer((ServerPlayer) player, new TeamColorSyncPayload(teamColor));
 
-        boolean teamPvP = player.getPersistentData().getBoolean("teamPvP");
+        boolean teamPvP = MineTeamConfig.allowDamageSelf.get();
         PacketDistributor.sendToPlayer((ServerPlayer) player, new TeamPvPSyncPayload(teamPvP));
 
 
@@ -70,7 +59,7 @@ public class LivingEventSubscriber {
             ServerScoreboard scoreboard = serverLevel.getServer().getScoreboard();
             PlayerTeam attackEntityTeam = scoreboard.getPlayersTeam(attackEntity.getScoreboardName());
             PlayerTeam hurtEntityTeam = scoreboard.getPlayersTeam(hurtEntity.getScoreboardName());
-            if (attackEntity == hurtEntity){
+            if (attackEntity == hurtEntity && MineTeamConfig.allowDamageSelf.get()) {
                 return;
             }
             if (hurtEntityTeam == null || attackEntityTeam == null ||hurtEntityTeam != attackEntityTeam) {

@@ -6,6 +6,7 @@
   "refmap": "mine_team.refmap.json",
   "mixins": [
     "MobMixin",
+    "PlayerMixin",
     "PlayerTeamMixin",
     "ServerScoreboardMixin"
   ],

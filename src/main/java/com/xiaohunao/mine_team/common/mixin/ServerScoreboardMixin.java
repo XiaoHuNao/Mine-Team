@@ -2,7 +2,6 @@ package com.xiaohunao.mine_team.common.mixin;
 
 import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.mixed.MobMixed;
-import com.xiaohunao.mine_team.common.mixed.PlayerTeamMixed;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;

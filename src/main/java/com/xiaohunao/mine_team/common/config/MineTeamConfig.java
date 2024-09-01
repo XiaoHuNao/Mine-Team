@@ -20,6 +20,8 @@ public class MineTeamConfig {
     private static final ModConfigSpec.ConfigValue<List<? extends String>> tamingMaterials;
     private static final BiMap<EntityType<?>, Ingredient> tamingMaterialMap = HashBiMap.create();
 
+    public static final ModConfigSpec.BooleanValue allowDamageSelf;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         tamingMaterials = builder
@@ -31,6 +33,10 @@ public class MineTeamConfig {
                     }
                     return Pattern.matches("\\w+:\\w+-\\{\"\\w+\":\"\\w+:\\w+\"}", (String) str);
                 });
+
+        allowDamageSelf = builder
+                .comment("Whether or not to allow entities within the Team to attack themselves")
+                .define("allowDamageSelf", true);
         CONFIG = builder.build();
     }
 

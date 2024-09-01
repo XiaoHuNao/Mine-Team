@@ -7,14 +7,13 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mod(MineTeam.MOD_ID)
 public class MineTeam {
@@ -36,6 +35,13 @@ public class MineTeam {
     @SubscribeEvent
     public void onFMLCommonSetup(FMLCommonSetupEvent event) {
         MineTeamConfig.loadTamingMaterials();
+    }
+
+    public static void extracted(CallbackInfoReturnable<Boolean> cir) {
+        Boolean returnValue = cir.getReturnValue();
+        if (!returnValue){
+            cir.setReturnValue(MineTeamConfig.allowDamageSelf.get());
+        }
     }
 
 
