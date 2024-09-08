@@ -1,10 +1,15 @@
 package com.xiaohunao.mine_team.common.mixin;
 
+import com.google.gson.JsonPrimitive;
+import com.mojang.serialization.JavaOps;
+import com.mojang.serialization.JsonOps;
 import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.mixed.MobMixed;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
@@ -15,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.UUID;
 
 @Mixin(ServerScoreboard.class)
 public class ServerScoreboardMixin {
@@ -26,16 +30,12 @@ public class ServerScoreboardMixin {
         server.levelKeys().forEach(key -> {
             ServerLevel level = server.getLevel(key);
             if (level != null) {
-                Scoreboard scoreboard = level.getScoreboard();
-                try {
-                    UUID uuid = UUID.fromString(playerName);
+                UUIDUtil.STRING_CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive(playerName)).result().ifPresent(uuid -> {
                     Entity entity = level.getEntity(uuid);
                     if (entity instanceof MobMixed mobMixed) {
                         mobMixed.setTame(team);
                     }
-                }catch (IllegalArgumentException e) {
-                    MineTeam.LOGGER.error("Failed to parse UUID: {}", playerName);
-                }
+                });
             }
         });
     }
