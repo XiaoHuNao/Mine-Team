@@ -8,19 +8,16 @@ import com.xiaohunao.mine_team.common.network.TeamPvPSyncPayload;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = MineTeam.MOD_ID)
@@ -108,19 +105,4 @@ public class LivingEventSubscriber {
             }
         }
     }
-
-    @SubscribeEvent
-    public static void onPlayerInteractRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        Level level = event.getLevel();
-        InteractionHand hand = event.getHand();
-        Player player = event.getEntity();
-        if (level.isClientSide() || hand != InteractionHand.MAIN_HAND) {
-            return;
-        }
-//        Ingredient ingredient = Ingredient.of(Tags.Items.ARMORS);
-//        Ingredient.CODEC_NONEMPTY.encodeStart(JsonOps.COMPRESSED,ingredient).result().ifPresent(System.out::println);
-//        Ingredient.CODEC_NONEMPTY.encodeStart(JsonOps.INSTANCE,ingredient).result().ifPresent(System.out::println);
-    }
-
-
 }

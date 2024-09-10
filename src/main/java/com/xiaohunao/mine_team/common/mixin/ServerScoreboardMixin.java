@@ -1,18 +1,14 @@
 package com.xiaohunao.mine_team.common.mixin;
 
 import com.google.gson.JsonPrimitive;
-import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
-import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.mixed.MobMixed;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

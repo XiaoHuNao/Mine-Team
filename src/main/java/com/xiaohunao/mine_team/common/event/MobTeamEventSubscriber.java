@@ -41,11 +41,11 @@ public class MobTeamEventSubscriber {
             PlayerTeam playersTeam = serverLevel.getServer().getScoreboard().getPlayersTeam(target.getScoreboardName());
             if (livingEntity.hasEffect(MobEffects.WEAKNESS) && playersTeam == null) {
                 itemstack.consume(1, player);
-//                livingEntity.getPersistentData().putInt("TeamConversionTime",livingEntity.level().random.nextInt(2401) + 3600);
-                tag.putInt("teamTamingTime",livingEntity.level().random.nextInt(80));
+                livingEntity.getPersistentData().putInt("TeamConversionTime",livingEntity.level().random.nextInt(2401) + 3600);
                 tag.putString("teamTamingColor",player.getPersistentData().getString("teamColor"));
                 livingEntity.removeEffect(MobEffects.WEAKNESS);
                 livingEntity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, Math.min(livingEntity.level().getDifficulty().getId() - 1, 0)));
+                livingEntity.setGlowingTag(true);
                 PacketDistributor.sendToPlayersInDimension(serverLevel, new MobTamingS2CPayload(target.getId(),target.blockPosition()));
             }
         }
