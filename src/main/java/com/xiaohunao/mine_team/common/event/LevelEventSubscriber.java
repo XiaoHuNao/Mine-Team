@@ -7,14 +7,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.scores.PlayerTeam;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.LevelEvent;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.Arrays;
 import java.util.Locale;
 
-@EventBusSubscriber(modid = MineTeam.MOD_ID)
+@Mod.EventBusSubscriber(modid = MineTeam.MOD_ID)
 public class LevelEventSubscriber {
     @SubscribeEvent
     public static void onCreateSpawnPosition(LevelEvent.CreateSpawnPosition event) {

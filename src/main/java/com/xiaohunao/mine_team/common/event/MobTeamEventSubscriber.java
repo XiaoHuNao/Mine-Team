@@ -2,7 +2,8 @@ package com.xiaohunao.mine_team.common.event;
 
 import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.config.MineTeamConfig;
-import com.xiaohunao.mine_team.common.network.MobTamingS2CPayload;
+import com.xiaohunao.mine_team.common.network.s2c.MobTamingS2CPayload;
+import com.xiaohunao.mine_team.common.network.NetworkHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
@@ -16,13 +17,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.PlayerTeam;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.tick.EntityTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
-@EventBusSubscriber(modid = MineTeam.MOD_ID)
+
+@Mod.EventBusSubscriber(modid = MineTeam.MOD_ID)
 public class MobTeamEventSubscriber {
     @SubscribeEvent
     public static void onPlayerInteractEntityInteract(PlayerInteractEvent.EntityInteract event) {
@@ -40,19 +42,19 @@ public class MobTeamEventSubscriber {
             ServerLevel serverLevel = (ServerLevel) level;
             PlayerTeam playersTeam = serverLevel.getServer().getScoreboard().getPlayersTeam(target.getScoreboardName());
             if (livingEntity.hasEffect(MobEffects.WEAKNESS) && playersTeam == null) {
-                itemstack.consume(1, player);
-                livingEntity.getPersistentData().putInt("TeamConversionTime",livingEntity.level().random.nextInt(2401) + 3600);
+                itemstack.hurtAndBreak(1, player, (playerEntity) -> playerEntity.broadcastBreakEvent(hand));
+                livingEntity.getPersistentData().putInt("teamTamingTime",livingEntity.level().random.nextInt(2401) + 3600);
                 tag.putString("teamTamingColor",player.getPersistentData().getString("teamColor"));
                 livingEntity.removeEffect(MobEffects.WEAKNESS);
                 livingEntity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, Math.min(livingEntity.level().getDifficulty().getId() - 1, 0)));
                 livingEntity.setGlowingTag(true);
-                PacketDistributor.sendToPlayersInDimension(serverLevel, new MobTamingS2CPayload(target.getId(),target.blockPosition()));
+                NetworkHandler.CHANNEL.sendToServer(new MobTamingS2CPayload(target.getId(),target.blockPosition()));
             }
         }
     }
 
     @SubscribeEvent
-    public static void onEntityTick(EntityTickEvent.Pre event) {
+    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof LivingEntity livingEntity && !livingEntity.level().isClientSide){
             CompoundTag tag = livingEntity.getPersistentData();

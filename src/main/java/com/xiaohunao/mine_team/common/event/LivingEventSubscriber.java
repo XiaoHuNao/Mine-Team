@@ -3,8 +3,11 @@ package com.xiaohunao.mine_team.common.event;
 import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.config.MineTeamConfig;
 import com.xiaohunao.mine_team.common.mixed.PlayerTeamMixed;
-import com.xiaohunao.mine_team.common.network.TeamColorSyncPayload;
-import com.xiaohunao.mine_team.common.network.TeamPvPSyncPayload;
+import com.xiaohunao.mine_team.common.network.NetworkHandler;
+import com.xiaohunao.mine_team.common.network.c2s.TeamColorSyncC2SPayload;
+import com.xiaohunao.mine_team.common.network.c2s.TeamPvPSyncC2SPayload;
+import com.xiaohunao.mine_team.common.network.s2c.TeamColorSyncS2CPayload;
+import com.xiaohunao.mine_team.common.network.s2c.TeamPvPSyncS2CPayload;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,26 +17,40 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
-@EventBusSubscriber(modid = MineTeam.MOD_ID)
+
+@Mod.EventBusSubscriber(modid = MineTeam.MOD_ID)
 public class LivingEventSubscriber {
     @SubscribeEvent
     public static void onPlayerLoggedInEvent(PlayerEvent.PlayerLoggedInEvent event) {
         Player player = event.getEntity();
+        if (player.level().isClientSide){
+            return;
+        }
+
         String teamColor = player.getPersistentData().getString("teamColor");
         if (teamColor.isEmpty()) {
             teamColor = "white";
             player.getPersistentData().putString("teamColor", teamColor);
+            NetworkHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),new TeamColorSyncS2CPayload(teamColor));
         }
-        PacketDistributor.sendToPlayer((ServerPlayer) player, new TeamColorSyncPayload(teamColor));
+
 
         boolean teamPvP = MineTeamConfig.allowDamageSelf.get();
-        PacketDistributor.sendToPlayer((ServerPlayer) player, new TeamPvPSyncPayload(teamPvP));
+        if (player.getPersistentData().contains("teamPvP")) {
+            teamPvP = player.getPersistentData().getBoolean("teamPvP");
+            NetworkHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),new TeamPvPSyncS2CPayload(teamPvP));
+        } else {
+            player.getPersistentData().putBoolean("teamPvP", teamPvP);
+            NetworkHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),new TeamPvPSyncS2CPayload(teamPvP));
+        }
+
+
 
 
         ServerLevel level = (ServerLevel)player.level();
@@ -48,7 +65,7 @@ public class LivingEventSubscriber {
     }
 
     @SubscribeEvent
-    public static void onLivingPvP(LivingIncomingDamageEvent event) {
+    public static void onLivingPvP(LivingDamageEvent event) {
         LivingEntity hurtEntity = event.getEntity();
         DamageSource source = event.getSource();
         Entity attackEntity = source.getEntity();
@@ -70,6 +87,7 @@ public class LivingEventSubscriber {
         }
     }
 
+
     @SubscribeEvent
     public static void onPlayerCloneEvent(PlayerEvent.Clone event) {
         Player entity = event.getEntity();
@@ -79,15 +97,15 @@ public class LivingEventSubscriber {
             boolean teamPvP = original.getPersistentData().getBoolean("teamPvP");
             entity.getPersistentData().putString("teamColor", teamColor);
             entity.getPersistentData().putBoolean("teamPvP", teamPvP);
-            PacketDistributor.sendToPlayer((ServerPlayer) entity, new TeamColorSyncPayload(teamColor));
-            PacketDistributor.sendToPlayer((ServerPlayer) entity, new TeamPvPSyncPayload(teamPvP));
+
+            NetworkHandler.CHANNEL.sendToServer(new TeamColorSyncS2CPayload(teamColor));
+            NetworkHandler.CHANNEL.sendToServer(new TeamPvPSyncS2CPayload(teamPvP));
         }
     }
 
 
-
     @SubscribeEvent
-    public static void onSetTeamLastHurtMob(LivingIncomingDamageEvent event) {
+    public static void onSetTeamLastHurtMob(LivingDamageEvent event) {
         LivingEntity hurtEntity = event.getEntity();
         DamageSource source = event.getSource();
         Entity attackEntity = source.getEntity();

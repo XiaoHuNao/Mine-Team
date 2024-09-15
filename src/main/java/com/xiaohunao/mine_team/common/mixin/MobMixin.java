@@ -35,8 +35,8 @@ public abstract class MobMixin extends Entity implements MobMixed {
     }
 
     @Inject(method = "defineSynchedData", at = @At("RETURN"))
-    private void defineSynchedData(SynchedEntityData.Builder builder, CallbackInfo ci) {
-        builder.define(DATA_FLAGS_ID, "");
+    private void defineSynchedData(CallbackInfo ci) {
+        this.entityData.define(DATA_FLAGS_ID, "");
     }
 
 
