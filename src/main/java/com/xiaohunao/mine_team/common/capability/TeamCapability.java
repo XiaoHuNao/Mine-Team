@@ -52,7 +52,7 @@ public class TeamCapability{
             PlayerTeam hurtEntityTeam = scoreboard.getPlayersTeam(hurtEntity.getScoreboardName());
 
 
-            if (attackEntityTeam != hurtEntityTeam){
+            if (attackEntityTeam != hurtEntityTeam || attackEntityTeam == null || hurtEntityTeam == null){
                 return true;
             }
 
