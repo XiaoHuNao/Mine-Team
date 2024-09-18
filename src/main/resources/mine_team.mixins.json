@@ -8,7 +8,8 @@
     "MobMixin",
     "PlayerMixin",
     "PlayerTeamMixin",
-    "ServerScoreboardMixin"
+    "ServerScoreboardMixin",
+    "SlimeMixin"
   ],
   "client": [
     "CreativeModeInventoryScreenMixin",

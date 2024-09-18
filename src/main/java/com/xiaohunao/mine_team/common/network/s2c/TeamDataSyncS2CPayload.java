@@ -8,10 +8,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.scores.Scoreboard;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public record TeamDataSyncS2CPayload(int entityId, TeamData data) {
@@ -40,6 +42,10 @@ public record TeamDataSyncS2CPayload(int entityId, TeamData data) {
                 Entity entity = Minecraft.getInstance().level.getEntity(packet.entityId);
                 if (entity instanceof LivingEntity livingEntity) {
                     TeamCapability.get(livingEntity).ifPresent(teamCapability -> {
+                        Scoreboard scoreboard = livingEntity.level().getScoreboard();
+                        if (!Objects.equals(teamCapability.data.getColor(), packet.data.getColor())) {
+                            scoreboard.addPlayerToTeam(livingEntity.getScoreboardName(),scoreboard.getPlayerTeam(packet.data.getColor()));
+                        }
                         teamCapability.setData(packet.data);
                     });
                 }
