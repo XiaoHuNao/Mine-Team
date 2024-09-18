@@ -3,15 +3,15 @@ package com.xiaohunao.mine_team.client.gui.team;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.xiaohunao.mine_team.MineTeam;
+import com.xiaohunao.mine_team.common.capability.TeamCapability;
+import com.xiaohunao.mine_team.common.capability.TeamData;
 import com.xiaohunao.mine_team.common.network.NetworkHandler;
-import com.xiaohunao.mine_team.common.network.c2s.TeamColorSyncC2SPayload;
-import com.xiaohunao.mine_team.common.network.c2s.TeamPvPSyncC2SPayload;
+import com.xiaohunao.mine_team.common.network.c2s.TeamDataSyncC2SPayload;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
 import java.util.Arrays;
@@ -20,6 +20,7 @@ import java.util.Map;
 
 public class TeamRender {
     private final EffectRenderingInventoryScreen<? extends AbstractContainerMenu> screen;
+    private final LocalPlayer player;
 
 
     private ImageButton teamIcon;
@@ -27,8 +28,9 @@ public class TeamRender {
     private ImageButton teamPVPOff;
     private final Map<String, ImageButton> teamSmallIcons = Maps.newHashMap();
 
-    public TeamRender(EffectRenderingInventoryScreen<? extends AbstractContainerMenu> screen) {
+    public TeamRender(EffectRenderingInventoryScreen<? extends AbstractContainerMenu> screen,LocalPlayer player) {
         this.screen = screen;
+        this.player = player;
     }
     public void renderTeamIcon(GuiGraphics guiGraphics, int mouseX, int mouseY,float partialTick){
         this.teamIcon.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -38,32 +40,35 @@ public class TeamRender {
     }
 
     public void initButton(){
-        CompoundTag tag = Minecraft.getInstance().player.getPersistentData();
-        String teamColor = tag.getString("teamColor");
-        boolean teamPvP = tag.getBoolean("teamPvP");
+        TeamCapability.get(player).ifPresent(teamCapability -> {
+            TeamData teamData = teamCapability.data;
+            int iconSize = 16;
+            int off = 6;
 
-        int iconSize = 16;
-        int off = 6;
-        this.teamIcon = new ImageButton(screen.leftPos - iconSize,screen.topPos, iconSize, iconSize,0,0,0,
-                MineTeam.asResource("textures/gui/team/" + teamColor + "_team_icon.png"),
-                16,16,
-                button-> {
-                    this.teamIcon.visible = false;
-                    this.teamPVPOn.visible = false;
-                    this.teamPVPOff.visible = false;
-                    visibleTeamSmallIcon(true);
-                });
-        this.teamPVPOff = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize,iconSize, 0,0,0,
-                MineTeam.asResource("textures/gui/team/pvp/" + teamColor + "_pvp_off.png"),
-                iconSize,iconSize,
-                button-> setTeamPvP(true));
-        this.teamPVPOn = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize, iconSize,0, 0,0,
-                MineTeam.asResource("textures/gui/team/pvp/" + teamColor + "_pvp_on.png"),
-                iconSize,iconSize,
-                button-> setTeamPvP(false));
-        initSmallIcon();
-        hasEnableTeamPvP();
-        addRenderableWidget();
+            this.teamIcon = new ImageButton(screen.leftPos - iconSize,screen.topPos, iconSize, iconSize,0,0,0,
+                    MineTeam.asResource("textures/gui/team/" + teamData.getColor() + "_team_icon.png"),
+                    16,16,
+                    button-> {
+                        this.teamIcon.visible = false;
+                        this.teamPVPOn.visible = false;
+                        this.teamPVPOff.visible = false;
+                        visibleTeamSmallIcon(true);
+                    });
+
+            this.teamPVPOff = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize,iconSize, 0,0,0,
+                    MineTeam.asResource("textures/gui/team/pvp/" + teamData.getColor() + "_pvp_off.png"),
+                    iconSize,iconSize,
+                    button-> setTeamPvP(true));
+
+            this.teamPVPOn = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize, iconSize,0, 0,0,
+                    MineTeam.asResource("textures/gui/team/pvp/" + teamData.getColor() + "_pvp_on.png"),
+                    iconSize,iconSize,
+                    button-> setTeamPvP(false));
+
+            initSmallIcon();
+            hasEnableTeamPvP();
+            addRenderableWidget();
+        });
     }
 
     private void initSmallIcon(){
@@ -104,24 +109,31 @@ public class TeamRender {
     }
 
     private void setTeamColor(String teamColor){
-        Minecraft.getInstance().player.getPersistentData().putString("teamColor", teamColor);
-        NetworkHandler.CHANNEL.sendToServer(new TeamColorSyncC2SPayload(teamColor));
+        TeamCapability.get(player).ifPresent(teamCapability -> {
+            TeamData teamData = teamCapability.data;
+            teamData.setColor(teamColor);
+            NetworkHandler.CHANNEL.sendToServer(new TeamDataSyncC2SPayload(player.getId(), teamData));
+        });
         setImageButtonSprites(this.teamIcon, "textures/gui/team/" + teamColor + "_team_icon.png");
         setImageButtonSprites(this.teamPVPOn, "textures/gui/team/pvp/" + teamColor + "_pvp_on.png");
         setImageButtonSprites(this.teamPVPOff, "textures/gui/team/pvp/" + teamColor + "_pvp_off.png");
     }
 
     public void setTeamPvP(boolean friendlyFire) {
-        NetworkHandler.CHANNEL.sendToServer(new TeamPvPSyncC2SPayload(friendlyFire));
-        Minecraft.getInstance().player.getPersistentData().putBoolean("teamPvP", friendlyFire);
+        TeamCapability.get(player).ifPresent(teamCapability -> {
+            TeamData teamData = teamCapability.data;
+            teamData.setPvP(friendlyFire);
+            NetworkHandler.CHANNEL.sendToServer(new TeamDataSyncC2SPayload(player.getId(), teamData));
+        });
         this.teamPVPOn.visible = friendlyFire;
         this.teamPVPOff.visible = !friendlyFire;
     }
 
     private void hasEnableTeamPvP() {
-        boolean teamPvP = Minecraft.getInstance().player.getPersistentData().getBoolean("teamPvP");
-        this.teamPVPOn.visible = teamPvP;
-        this.teamPVPOff.visible = !teamPvP;
+        TeamCapability.get(player).ifPresent(teamCapability -> {
+            boolean teamPvP = teamCapability.data.isPvP();
+            setTeamPvP(teamPvP);
+        });
     }
 
     private void visibleTeamSmallIcon(boolean visible){
@@ -135,7 +147,6 @@ public class TeamRender {
         }
     }
     private void setImageButtonSprites(ImageButton button, String path) {
-//        ((ImageButtonAccessor)button).setSprites(MineTeam.asResource(path));
         button.resourceLocation = MineTeam.asResource(path);
     }
 

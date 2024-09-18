@@ -12,6 +12,7 @@
   ],
   "client": [
     "CreativeModeInventoryScreenMixin",
+    "EntityRenderDispatcherMixin",
     "InventoryScreenMixin"
   ],
   "injectors": {

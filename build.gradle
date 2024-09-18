@@ -97,15 +97,12 @@ minecraft {
 
         client {
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
             property 'forge.enabledGameTestNamespaces', mod_id
         }
 
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
         }
 
         // This run config launches GameTestServer and runs all registered gametests, then exits.
@@ -127,6 +124,7 @@ minecraft {
 
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
+
     config "${mod_id}.mixins.json"
 }
 
@@ -151,9 +149,6 @@ dependencies {
     // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-
-//    runtimeOnly fg.deobf("curse.maven:mmmmmmmmmmmm-225738:5594972")
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

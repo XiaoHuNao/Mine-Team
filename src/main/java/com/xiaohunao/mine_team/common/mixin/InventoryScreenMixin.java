@@ -1,6 +1,7 @@
 package com.xiaohunao.mine_team.common.mixin;
 
 import com.xiaohunao.mine_team.client.gui.team.TeamRender;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends EffectRenderingInventoryScreen<InventoryMenu>{
     @Unique
-    private final TeamRender team$teamRender = new TeamRender(this);
+    private final TeamRender team$teamRender = new TeamRender(this, Minecraft.getInstance().player);
 
     public InventoryScreenMixin(InventoryMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);

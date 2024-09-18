@@ -1,6 +1,7 @@
 package com.xiaohunao.mine_team.common.mixin;
 
 import com.xiaohunao.mine_team.client.gui.team.TeamRender;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(CreativeModeInventoryScreen.class)
 public abstract class CreativeModeInventoryScreenMixin extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
     @Unique
-    private final TeamRender team$teamRender = new TeamRender(this);
+    private final TeamRender team$teamRender = new TeamRender(this, Minecraft.getInstance().player);
 
     public CreativeModeInventoryScreenMixin(CreativeModeInventoryScreen.ItemPickerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);

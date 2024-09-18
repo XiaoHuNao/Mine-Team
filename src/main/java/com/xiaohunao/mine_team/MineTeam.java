@@ -12,7 +12,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 
 @Mod(MineTeam.MOD_ID)
 public class MineTeam {
@@ -40,19 +40,7 @@ public class MineTeam {
         });
     }
 
-    public static void extracted(CallbackInfoReturnable<Boolean> cir) {
-        Boolean returnValue = cir.getReturnValue();
-        if (!returnValue){
-            cir.setReturnValue(MineTeamConfig.allowDamageSelf.get());
-        }
-    }
-//
-//
-//    @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-//    public static class ClientModEvents {
-//        @SubscribeEvent
-//        public static void onClientSetup(FMLClientSetupEvent event) {
-//
-//        }
-//    }
+
+
+
 }
