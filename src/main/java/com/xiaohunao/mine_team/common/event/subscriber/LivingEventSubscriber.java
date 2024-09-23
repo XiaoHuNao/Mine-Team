@@ -1,4 +1,4 @@
-package com.xiaohunao.mine_team.common.event;
+package com.xiaohunao.mine_team.common.event.subscriber;
 
 import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.capability.TeamCapability;

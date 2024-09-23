@@ -11,6 +11,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 import java.util.Random;
 
 public class TeamData{
+    public static final TeamData DEFAULT = new TeamData(null, "white", false, 0, false, Ingredient.of(Items.GOLDEN_APPLE), true);
+
     public static Codec<Ingredient> Ingredient_codec = Codec.STRING.xmap(
             string -> Ingredient.fromJson(JsonParser.parseString(string)),
             ingredient -> ingredient.toJson().toString());

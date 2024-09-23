@@ -2,9 +2,12 @@ package com.xiaohunao.mine_team.common.capability;
 
 import com.google.common.collect.Maps;
 import net.minecraft.world.entity.EntityType;
+import net.minecraftforge.eventbus.api.Event;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TeamDataManager {
     public static final TeamDataManager INSTANCE = new TeamDataManager();
@@ -34,4 +37,6 @@ public class TeamDataManager {
         }
         return teamData;
     }
+
+
 }

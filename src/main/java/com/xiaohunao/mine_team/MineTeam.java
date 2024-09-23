@@ -3,8 +3,10 @@ package com.xiaohunao.mine_team;
 import com.mojang.logging.LogUtils;
 import com.xiaohunao.mine_team.common.config.MineTeamConfig;
 import com.xiaohunao.mine_team.common.config.ModJsonConfig;
+import com.xiaohunao.mine_team.common.event.RegisterTeamDataEvent;
 import com.xiaohunao.mine_team.common.network.NetworkHandler;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -38,6 +40,8 @@ public class MineTeam {
         event.enqueueWork(() -> {
             NetworkHandler.register();
             ModJsonConfig.INSTANCE.init();
+            MinecraftForge.EVENT_BUS.start();
+            MinecraftForge.EVENT_BUS.post(new RegisterTeamDataEvent());
         });
     }
 
