@@ -20,6 +20,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.PlayerTeam;
@@ -31,15 +32,18 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Random;
+
+
 public class TeamCapability{
-    public TeamData data = new TeamData("white", false,0,false);
+    public TeamData data;
+    public TeamCapability(LivingEntity livingEntity) {
+        TeamData teamData = new TeamData(livingEntity.getType(), "white", false, new Random().nextInt(2401) + 3600, false, Ingredient.of(Items.GOLDEN_APPLE), true);
+        this.data = TeamDataManager.INSTANCE.getOrDefault(livingEntity.getType(), teamData);
+    }
 
     public static LazyOptional<TeamCapability> get(LivingEntity living){
         return living.getCapability(ModCapability.TEAM);
-    }
-
-    public void setData(TeamData data) {
-        this.data = data;
     }
 
     public boolean canAttack(LivingEntity attackEntity, LivingEntity hurtEntity) {
@@ -57,7 +61,7 @@ public class TeamCapability{
             }
 
 
-            if (!data.isPvP() && !get(hurtEntity).orElse(new TeamCapability()).data.isPvP()) {
+            if (!data.isPvP() && !get(hurtEntity).orElse(new TeamCapability(hurtEntity)).data.isPvP()) {
                 return false;
             }
         }
@@ -95,19 +99,19 @@ public class TeamCapability{
         }
     }
 
-    public void withMobTeam(Player player, LivingEntity interactEntity, InteractionHand hand, Ingredient tamingMaterial) {
+    public void withMobTeam(Player player, LivingEntity interactEntity, InteractionHand hand) {
         ItemStack handStack = player.getItemInHand(hand);
-        if (!tamingMaterial.test(handStack) || interactEntity instanceof Player){
+        if (interactEntity instanceof Player){
             return;
         }
 
         Level level = player.level();
         TeamCapability.get(interactEntity).ifPresent(teamCapability -> {
-            PlayerTeam playersTeam = level.getScoreboard().getPlayersTeam(interactEntity.getScoreboardName());
-            if (interactEntity.hasEffect(MobEffects.WEAKNESS) && playersTeam == null){
-                if (!level.isClientSide){
-                    TeamData interactEntityTeamData = teamCapability.data;
-                    interactEntityTeamData.setFranticTime(level.random.nextInt(2401) + 3600);
+            TeamData interactEntityTeamData = teamCapability.data;
+            if (interactEntityTeamData.isCanTeam() && interactEntityTeamData.getTeamIngredient().test(handStack)){
+                PlayerTeam playersTeam = level.getScoreboard().getPlayersTeam(interactEntity.getScoreboardName());
+                if (interactEntity.hasEffect(MobEffects.WEAKNESS) && playersTeam == null && !level.isClientSide){
+                    interactEntityTeamData.setFranticTime(interactEntityTeamData.getFranticTime());
                     interactEntityTeamData.setColor(data.getColor());
                     interactEntityTeamData.setFrantic(true);
                     NetworkHandler.CHANNEL.send(PacketDistributor.DIMENSION.with(level::dimension),new TeamDataSyncS2CPayload(interactEntity.getId(),interactEntityTeamData));
@@ -125,7 +129,7 @@ public class TeamCapability{
 
     public void tickMobTeam(LivingEntity livingEntity) {
         Level level = livingEntity.level();
-        if (data.isFrantic() && data.getFranticTime() >= 0){
+        if (data.getFranticTime() >= 0){
             if (!level.isClientSide){
                 data.setFranticTime(data.getFranticTime() - 1);
                 ServerLevel serverLevel = (ServerLevel) level;
@@ -143,14 +147,14 @@ public class TeamCapability{
             }
         }
 
-        if (data.isFrantic() && data.getFranticTime() == -1){
+        if (data.getFranticTime() == -1){
             if (!level.isClientSide){
                 ServerLevel serverLevel = (ServerLevel) level;
                 ServerScoreboard scoreboard = serverLevel.getServer().getScoreboard();
                 scoreboard.addPlayerToTeam(livingEntity.getScoreboardName(), scoreboard.getPlayerTeam(data.getColor()));
                 livingEntity.setGlowingTag(true);
                 data.setFrantic(false);
-                data.setFranticTime(0);
+                data.setFranticTime(data.getTotalFranticTime());
                 NetworkHandler.CHANNEL.send(PacketDistributor.DIMENSION.with(serverLevel::dimension),new TeamDataSyncS2CPayload(livingEntity.getId(), data));
             }
         }
@@ -158,9 +162,11 @@ public class TeamCapability{
 
     public static class Provider implements ICapabilitySerializable<Tag> {
         private final LazyOptional<TeamCapability> instance;
+        private final LivingEntity livingEntity;
 
-        public Provider() {
-            this.instance = LazyOptional.of(TeamCapability::new);
+        public Provider(LivingEntity livingEntity) {
+            this.livingEntity = livingEntity;
+            this.instance = LazyOptional.of(() -> new TeamCapability(livingEntity));
         }
         @Override
         public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -169,13 +175,13 @@ public class TeamCapability{
 
         @Override
         public Tag serializeNBT() {
-            return TeamData.CODEC.encodeStart(NbtOps.INSTANCE, instance.orElse(new TeamCapability()).data).result().orElse(new CompoundTag());
+            return TeamData.CODEC.encodeStart(NbtOps.INSTANCE, instance.orElse(new TeamCapability(livingEntity)).data).result().orElse(new CompoundTag());
         }
 
         @Override
         public void deserializeNBT(Tag compoundTag) {
             instance.ifPresent(teamCapability -> {
-                teamCapability.data = TeamData.CODEC.parse(NbtOps.INSTANCE, compoundTag).result().orElse(TeamData.DEFAULT);
+                teamCapability.data.copy(TeamData.CODEC.parse(NbtOps.INSTANCE, compoundTag).result().orElse(new TeamData(livingEntity.getType(), "white", false, new Random().nextInt(2401) + 3600, false, Ingredient.of(Items.GOLDEN_APPLE), true)));
             });
         }
     }

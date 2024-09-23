@@ -122,7 +122,7 @@ public class TeamRender {
     public void setTeamPvP(boolean friendlyFire) {
         TeamCapability.get(player).ifPresent(teamCapability -> {
             TeamData teamData = teamCapability.data;
-            teamData.setPvP(friendlyFire);
+            teamData.setPvp(friendlyFire);
             NetworkHandler.CHANNEL.sendToServer(new TeamDataSyncC2SPayload(player.getId(), teamData));
         });
         this.teamPVPOn.visible = friendlyFire;

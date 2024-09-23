@@ -55,7 +55,7 @@ public class LivingEventSubscriber {
         if (event.isWasDeath() && !player.level().isClientSide()) {
             TeamCapability.get(player).ifPresent(teamCapability -> {
                 TeamCapability.get(original).ifPresent(originalTeamCapability -> {
-                    teamCapability.data = originalTeamCapability.data;
+                    teamCapability.data.copy(originalTeamCapability.data);
                     NetworkHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),new TeamDataSyncS2CPayload(player.getId(), originalTeamCapability.data));
                 });
             });

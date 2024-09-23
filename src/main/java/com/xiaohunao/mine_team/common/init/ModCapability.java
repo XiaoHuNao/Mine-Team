@@ -21,8 +21,8 @@ public class ModCapability {
     @SubscribeEvent
     public static void attachEntityCapability(AttachCapabilitiesEvent<Entity> event) {
         Entity entity = event.getObject();
-        if (entity instanceof LivingEntity) {
-            event.addCapability(MineTeam.asResource("team"), new TeamCapability.Provider());
+        if (entity instanceof LivingEntity livingEntity) {
+            event.addCapability(MineTeam.asResource("team"), new TeamCapability.Provider(livingEntity));
         }
     }
 }

@@ -46,7 +46,7 @@ public record TeamDataSyncS2CPayload(int entityId, TeamData data) {
                         if (!Objects.equals(teamCapability.data.getColor(), packet.data.getColor())) {
                             scoreboard.addPlayerToTeam(livingEntity.getScoreboardName(),scoreboard.getPlayerTeam(packet.data.getColor()));
                         }
-                        teamCapability.setData(packet.data);
+                        teamCapability.data.copy(packet.data);
                     });
                 }
             });

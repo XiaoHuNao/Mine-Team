@@ -32,7 +32,7 @@ public class SlimeMixin {
             if (playersTeam != null){
                 scoreboard.addPlayerToTeam(slime.getScoreboardName(),playersTeam);
                 slime.setGlowingTag(true);
-                TeamData teamData = TeamCapability.get(thisSlime).orElse(new TeamCapability()).data;
+                TeamData teamData = TeamCapability.get(thisSlime).orElse(new TeamCapability(thisSlime)).data;
                 NetworkHandler.CHANNEL.send(PacketDistributor.DIMENSION.with(level::dimension),new TeamDataSyncS2CPayload(slime.getId(),teamData));
             }
         }

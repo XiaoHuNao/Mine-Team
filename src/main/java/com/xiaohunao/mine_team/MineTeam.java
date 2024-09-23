@@ -2,6 +2,7 @@ package com.xiaohunao.mine_team;
 
 import com.mojang.logging.LogUtils;
 import com.xiaohunao.mine_team.common.config.MineTeamConfig;
+import com.xiaohunao.mine_team.common.config.ModJsonConfig;
 import com.xiaohunao.mine_team.common.network.NetworkHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -36,9 +37,11 @@ public class MineTeam {
     public void onFMLCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             NetworkHandler.register();
-            MineTeamConfig.loadTamingMaterials();
+            ModJsonConfig.INSTANCE.init();
         });
     }
+
+
 
 
 
