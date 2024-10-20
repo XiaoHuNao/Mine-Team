@@ -1,9 +1,8 @@
 plugins {
     id 'java-library'
-    id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.19-beta'
+    id 'net.neoforged.moddev' version '2.0.30-beta'
 }
 
 version = mod_version
