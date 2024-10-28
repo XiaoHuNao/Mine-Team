@@ -3,6 +3,7 @@ package com.xiaohunao.mine_team.common.network;
 import com.xiaohunao.mine_team.MineTeam;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -22,7 +23,8 @@ public record MobTamingS2CPayload(int entityId,BlockPos pos) implements CustomPa
 
     public static void clientHandle(final MobTamingS2CPayload payload,final IPayloadContext context) {
         context.enqueueWork(() -> {
-            Entity entity = Minecraft.getInstance().level.getEntity(payload.entityId);
+            ClientLevel clientLevel = Minecraft.getInstance().level;
+            Entity entity = clientLevel.getEntity(payload.entityId);
             if (entity != null) {
                 entity.level().playLocalSound(payload.pos.getX(), payload.pos.getY(), payload.pos.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, entity.getSoundSource(), 1.0F + entity.level().random.nextFloat(), entity.level().random.nextFloat() * 0.7F + 0.3F, false);
             }}
