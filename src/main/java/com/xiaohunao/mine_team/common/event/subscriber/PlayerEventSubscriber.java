@@ -26,13 +26,14 @@ public class PlayerEventSubscriber {
         Player player = event.getEntity();
         ServerLevel serverLevel = (ServerLevel)player.level();
         TeamManager teamManager = TeamManager.of(serverLevel);
-        TeamAttachment attachment = player.getData(MTAttachmentTypes.TEAM);
-        if (!player.hasData(MTAttachmentTypes.TEAM)){
+
+        if (!player.hasData(MTAttachmentTypes.TEAM)) {
+            TeamAttachment attachment = player.getData(MTAttachmentTypes.TEAM);
             attachment.setTeamUid(teamManager.getTeam(DyeColor.WHITE).getUid())
                     .setCanPvP(false);
             player.setData(MTAttachmentTypes.TEAM, attachment);
         }
-        PacketDistributor.sendToPlayer((ServerPlayer) player, new TeamAttachmentSyncPayload(player.getId(),attachment));
+        PacketDistributor.sendToPlayer((ServerPlayer) player, new TeamAttachmentSyncPayload(player.getId(),player.getData(MTAttachmentTypes.TEAM)));
     }
 
 //    @SubscribeEvent

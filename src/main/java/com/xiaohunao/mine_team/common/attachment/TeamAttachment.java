@@ -9,6 +9,8 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class TeamAttachment {
+    public static UUID EMPTY = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
     public static final Codec<TeamAttachment> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             UUIDUtil.CODEC.optionalFieldOf("team_uid",UUID.randomUUID()).forGetter(TeamAttachment::getTeamUid),
             Codec.BOOL.optionalFieldOf("can_pvp", true).forGetter(TeamAttachment::isCanPvP)
