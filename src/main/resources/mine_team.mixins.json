@@ -5,14 +5,10 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "mine_team.refmap.json",
   "mixins": [
-    "MobMixin",
-    "PlayerMixin",
-    "PlayerTeamMixin",
-    "ServerScoreboardMixin"
+    "LevelMixin"
   ],
   "client": [
     "CreativeModeInventoryScreenMixin",
-    "ImageButtonAccessor",
     "InventoryScreenMixin"
   ],
   "injectors": {

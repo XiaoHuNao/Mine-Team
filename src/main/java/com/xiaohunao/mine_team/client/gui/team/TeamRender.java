@@ -2,21 +2,24 @@ package com.xiaohunao.mine_team.client.gui.team;
 
 import com.google.common.collect.Maps;
 import com.xiaohunao.mine_team.MineTeam;
-import com.xiaohunao.mine_team.common.mixin.ImageButtonAccessor;
-import com.xiaohunao.mine_team.common.network.TeamColorSyncPayload;
-import com.xiaohunao.mine_team.common.network.TeamPvPSyncPayload;
-import net.minecraft.ChatFormatting;
+import com.xiaohunao.mine_team.common.attachment.TeamAttachment;
+import com.xiaohunao.mine_team.common.init.MTAttachmentTypes;
+import com.xiaohunao.mine_team.common.network.TeamAttachmentSyncPayload;
+import com.xiaohunao.mine_team.common.team.Team;
+import com.xiaohunao.mine_team.common.team.TeamManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.DyeColor;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class TeamRender {
@@ -38,34 +41,47 @@ public class TeamRender {
         renderTeamSmallIcon(guiGraphics, mouseX, mouseY, partialTick);
     }
 
-    public void initButton(){
-        CompoundTag tag = Minecraft.getInstance().player.getPersistentData();
-        String teamColor = tag.getString("teamColor");
-        boolean teamPvP = tag.getBoolean("teamPvP");
-
-        int iconSize = 16;
-        int off = 6;
-        this.teamIcon = new ImageButton(screen.leftPos - iconSize,screen.topPos, iconSize, iconSize, createWidgetSprites("team/" + teamColor + "_team_icon"),  button-> {
-            this.teamIcon.visible = false;
-            this.teamPVPOn.visible = false;
-            this.teamPVPOff.visible = false;
-            visibleTeamSmallIcon(true);
-        });
-        this.teamPVPOff = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize, iconSize,
-                createWidgetSprites("team/pvp/" + teamColor + "_pvp_off"),
-                button-> setTeamPvP(true));
-        this.teamPVPOn = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize, iconSize,
-                createWidgetSprites("team/pvp/" + teamColor + "_pvp_on"),
-                button-> setTeamPvP(false));
-        initSmallIcon();
-        hasEnableTeamPvP();
-        addRenderableWidget();
+    private void renderTeamSmallIcon(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick){
+        for (ImageButton button : teamSmallIcons.values()) {
+            button.render(guiGraphics, mouseX, mouseY, partialTick);
+        }
     }
 
-    private void initSmallIcon(){
-        List<String> teamColors = Arrays.stream(ChatFormatting.values())
-                .filter(ChatFormatting::isColor)
-                .map(ChatFormatting::getName)
+    public void initButton(){
+        LocalPlayer localPlayer = Minecraft.getInstance().player;
+        TeamManager teamManager = TeamManager.of(localPlayer.level());
+
+        if (localPlayer.hasData(MTAttachmentTypes.TEAM)) {
+            TeamAttachment teamAttachment = localPlayer.getData(MTAttachmentTypes.TEAM);
+            Team team = teamManager.getTeam(teamAttachment.getTeamUid());
+            DyeColor dyeColor = teamManager.getDyeColor(team);
+            if (dyeColor != null) {
+                String teamColor = dyeColor.getName();
+                int iconSize = 16;
+                int off = 6;
+                this.teamIcon = new ImageButton(screen.leftPos - iconSize,screen.topPos, iconSize, iconSize, createWidgetSprites("team/" + teamColor + "_team_icon"),  button-> {
+                    this.teamIcon.visible = false;
+                    this.teamPVPOn.visible = false;
+                    this.teamPVPOff.visible = false;
+                    visibleTeamSmallIcon(true);
+                });
+
+                this.teamPVPOff = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize, iconSize,
+                        createWidgetSprites("team/pvp/" + teamColor + "_pvp_off"),
+                        button-> setTeamPvP(localPlayer,true));
+                this.teamPVPOn = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize, iconSize,
+                        createWidgetSprites("team/pvp/" + teamColor + "_pvp_on"),
+                        button-> setTeamPvP(localPlayer,false));
+                initSmallIcon(localPlayer);
+                hasEnableTeamPvP(localPlayer);
+                addRenderableWidget();
+            }
+        }
+    }
+
+    private void initSmallIcon(LocalPlayer localPlayer){
+        List<String> teamColors = Arrays.stream(DyeColor.values())
+                .map(DyeColor::getName)
                 .toList().reversed();
 
         int size = 8;
@@ -75,7 +91,7 @@ public class TeamRender {
             int y = screen.topPos + (i % 8) * size + (i % 8) * 2;
 
             ImageButton teamSmallIconBtn = new ImageButton(x, y, size, size, createWidgetSprites("team/small/" + newTeamColor + "_team_small_icon"),
-                    button -> teamSmallIconButtonPressed(newTeamColor));
+                    button -> teamSmallIconButtonPressed(localPlayer,newTeamColor));
             teamSmallIconBtn.visible = false;
             teamSmallIcons.put(newTeamColor, teamSmallIconBtn);
         }
@@ -90,30 +106,31 @@ public class TeamRender {
         }
     }
 
-    private void teamSmallIconButtonPressed(String teamColor){
-        setTeamColor(teamColor);
+    private void teamSmallIconButtonPressed(LocalPlayer localPlayer, String teamColor){
+        setTeamColor(localPlayer,teamColor);
         this.teamIcon.visible = true;
         visibleTeamSmallIcon(false);
-        hasEnableTeamPvP();
+        hasEnableTeamPvP(localPlayer);
     }
 
-    private void setTeamColor(String teamColor){
-        Minecraft.getInstance().player.getPersistentData().putString("teamColor", teamColor);
-        PacketDistributor.sendToServer(new TeamColorSyncPayload(teamColor));
+    private void setTeamColor(LocalPlayer localPlayer,String teamColor){
+        localPlayer.setData(MTAttachmentTypes.TEAM, localPlayer.getData(MTAttachmentTypes.TEAM)
+                .setTeamUid(TeamManager.of(localPlayer.clientLevel).getTeam(DyeColor.valueOf(teamColor.toUpperCase(Locale.ROOT))).getUid()));
+        PacketDistributor.sendToServer(new TeamAttachmentSyncPayload(localPlayer.getId(), localPlayer.getData(MTAttachmentTypes.TEAM)));
         setImageButtonSprites(this.teamIcon, "team/" + teamColor + "_team_icon");
         setImageButtonSprites(this.teamPVPOn, "team/pvp/" + teamColor + "_pvp_on");
         setImageButtonSprites(this.teamPVPOff, "team/pvp/" + teamColor + "_pvp_off");
     }
 
-    public void setTeamPvP(boolean friendlyFire) {
-        PacketDistributor.sendToServer(new TeamPvPSyncPayload(friendlyFire));
-        Minecraft.getInstance().player.getPersistentData().putBoolean("teamPvP", friendlyFire);
+    public void setTeamPvP(LocalPlayer localPlayer, boolean friendlyFire) {
+        localPlayer.setData(MTAttachmentTypes.TEAM, localPlayer.getData(MTAttachmentTypes.TEAM).setCanPvP(friendlyFire));
+        PacketDistributor.sendToServer(new TeamAttachmentSyncPayload(localPlayer.getId(), localPlayer.getData(MTAttachmentTypes.TEAM)));
         this.teamPVPOn.visible = friendlyFire;
         this.teamPVPOff.visible = !friendlyFire;
     }
 
-    private void hasEnableTeamPvP() {
-        boolean teamPvP = Minecraft.getInstance().player.getPersistentData().getBoolean("teamPvP");
+    private void hasEnableTeamPvP(LocalPlayer localPlayer) {
+        boolean teamPvP = localPlayer.getData(MTAttachmentTypes.TEAM).isCanPvP();
         this.teamPVPOn.visible = teamPvP;
         this.teamPVPOff.visible = !teamPvP;
     }
@@ -123,13 +140,9 @@ public class TeamRender {
             button.visible = visible;
         }
     }
-    private void renderTeamSmallIcon(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick){
-        for (ImageButton button : teamSmallIcons.values()) {
-            button.render(guiGraphics, mouseX, mouseY, partialTick);
-        }
-    }
+
     private void setImageButtonSprites(ImageButton button, String path) {
-        ((ImageButtonAccessor)button).setSprites(createWidgetSprites(path));
+        button.sprites = createWidgetSprites(path);
     }
     private WidgetSprites createWidgetSprites(String path) {
         return new WidgetSprites(MineTeam.asResource(path), MineTeam.asResource(path));

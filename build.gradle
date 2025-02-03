@@ -38,11 +38,18 @@ neoForge {
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
+        client1 {
+            client()
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            //玩家名字
+            programArguments = ["--username", "HuNao"]
+        }
 
         server {
             server()
 
-            programArgument '--nogui'
+//            programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
@@ -95,9 +102,27 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
 repositories {
+    maven {
+        url = "https://www.cursemaven.com"
+    }
+
+    maven {
+        // Shedaniel's maven (Architectury API)
+        url = "https://maven.architectury.dev"
+        content {
+            includeGroup "dev.architectury"
+        }
+    }
 }
 
 dependencies {
+    compileOnly "curse.maven:ftb-teams-forge-404468:6119437"
+    compileOnly "curse.maven:ftb-library-forge-404465:6016745"
+
+//    runtimeOnly "curse.maven:ftb-teams-forge-404468:6119437"
+//    runtimeOnly "curse.maven:ftb-library-forge-404465:6016745"
+//    runtimeOnly "dev.architectury:architectury-neoforge:13.0.8"
+
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
     // The group id is ignored when searching -- in this case, it is "blank"

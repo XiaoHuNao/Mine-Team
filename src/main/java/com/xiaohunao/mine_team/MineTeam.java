@@ -1,7 +1,7 @@
 package com.xiaohunao.mine_team;
 
 import com.mojang.logging.LogUtils;
-import com.xiaohunao.mine_team.common.config.MineTeamConfig;
+import com.xiaohunao.mine_team.common.init.MTAttachmentTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -15,37 +15,44 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mod(MineTeam.MOD_ID)
+@Mod(MineTeam.MODID)
 public class MineTeam {
-    public static final String MOD_ID = "mine_team";
+    public static final String MODID = "mine_team";
     public static final Logger LOGGER = LogUtils.getLogger();
     public MineTeam(IEventBus modEventBus, ModContainer modContainer) {
+        MTAttachmentTypes.ATTACHMENT_TYPES.register(modEventBus);
+
 //        NeoForge.EVENT_BUS.register(this);
-        modEventBus.addListener(this::onFMLCommonSetup);
-        modContainer.registerConfig(ModConfig.Type.COMMON, MineTeamConfig.CONFIG, "mine_team.toml");
+//        modEventBus.addListener(this::onFMLCommonSetup);
+//        modContainer.registerConfig(ModConfig.Type.COMMON, MineTeamConfig.CONFIG, "mine_team.toml");
     }
 
     public static ResourceLocation asResource(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
     public static String asResourceKey(String path) {
-        return MOD_ID + "." + path;
+        return MODID + "." + path;
     }
 
-    @SubscribeEvent
-    public void onFMLCommonSetup(FMLCommonSetupEvent event) {
-        MineTeamConfig.loadTamingMaterials();
-    }
+//    @SubscribeEvent
+//    public void onFMLCommonSetup(FMLCommonSetupEvent event) {
+//        MineTeamConfig.loadTamingMaterials();
+//    }
 
-    public static void extracted(CallbackInfoReturnable<Boolean> cir) {
-        Boolean returnValue = cir.getReturnValue();
-        if (!returnValue){
-            cir.setReturnValue(MineTeamConfig.allowDamageSelf.get());
-        }
-    }
+//    public static void extracted(CallbackInfoReturnable<Boolean> cir) {
+//        Boolean returnValue = cir.getReturnValue();
+//        if (!returnValue){
+//            cir.setReturnValue(MineTeamConfig.allowDamageSelf.get());
+//        }
+//    }
 
 
-    @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+
+
+
+
+
+    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
