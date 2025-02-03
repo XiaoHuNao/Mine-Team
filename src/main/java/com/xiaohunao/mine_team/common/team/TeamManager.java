@@ -58,7 +58,7 @@ public class TeamManager extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
+    public  CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
         CompoundTag taems = new CompoundTag();
         this.taems.forEach((uuid, team) -> {
             taems.put(uuid.toString(), team.serializeNBT());
@@ -73,25 +73,27 @@ public class TeamManager extends SavedData {
 
     public static TeamManager load(Level level,CompoundTag compoundTag) {
         TeamManager manager = new TeamManager();
+        manager.deserializeNBT(compoundTag);
+        if (!level.isClientSide){
+            PacketDistributor.sendToAllPlayers(new TeamManagerSyncPayload(compoundTag));
+        }
+        return manager;
+    }
+
+    public void deserializeNBT(CompoundTag compoundTag) {
         for (String uid : compoundTag.getCompound("taems").getAllKeys()) {
             UUID uuid = UUID.fromString(uid);
             Team team = new Team().deserializeNBT(compoundTag.getCompound("taems").getCompound(uid));
-            manager.taems.put(uuid, team);
+            this.taems.put(uuid, team);
 
             if (!LoadedCompat.FTB_TEAMS){
                 DyeColor dyeColor = DyeColor.byFireworkColor(team.getColor());
                 if (dyeColor != null){
-                    manager.dyeColorTeam.put(dyeColor, team);
+                    this.dyeColorTeam.put(dyeColor, team);
 
                 }
             }
-
-            if (!level.isClientSide){
-                PacketDistributor.sendToAllPlayers(new TeamManagerSyncPayload(compoundTag));
-            }
         }
-
-        return manager;
     }
 
 

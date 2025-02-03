@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record TeamManagerSyncPayload(CompoundTag compoundTag) implements CustomPacketPayload {
@@ -22,12 +23,9 @@ public record TeamManagerSyncPayload(CompoundTag compoundTag) implements CustomP
 
     public static void clientHandle(final TeamManagerSyncPayload payload, final IPayloadContext context) {
         context.enqueueWork(() -> {
-            ClientLevel clientLevel = Minecraft.getInstance().level;
-            TeamManager load = TeamManager.load(clientLevel,payload.compoundTag);
-            TeamManagerContainer teamManagerContainer = (TeamManagerContainer) clientLevel;
-            if (teamManagerContainer != null) {
-                teamManagerContainer.mine_team$setTeamManager(load);
-            }
+            Level level = context.player().level();
+            TeamManager teamManager = TeamManager.of(level);
+            teamManager.deserializeNBT(payload.compoundTag);
         });
     }
     @Override

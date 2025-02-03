@@ -3,6 +3,7 @@ package com.xiaohunao.mine_team.common.event.subscriber;
 import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.attachment.TeamAttachment;
 import com.xiaohunao.mine_team.common.network.TeamAttachmentSyncPayload;
+import com.xiaohunao.mine_team.common.team.Team;
 import com.xiaohunao.mine_team.common.team.TeamManager;
 import com.xiaohunao.mine_team.common.init.MTAttachmentTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -34,6 +35,7 @@ public class PlayerEventSubscriber {
             player.setData(MTAttachmentTypes.TEAM, attachment);
         }
         PacketDistributor.sendToPlayer((ServerPlayer) player, new TeamAttachmentSyncPayload(player.getId(),player.getData(MTAttachmentTypes.TEAM)));
+        serverLevel.getDataStorage().save();
     }
 
 //    @SubscribeEvent
@@ -64,11 +66,13 @@ public class PlayerEventSubscriber {
             return;
         }
 
-        if (player.hasData(MTAttachmentTypes.TEAM)) {
-            TeamAttachment attachment = player.getData(MTAttachmentTypes.TEAM);
-            System.out.println(attachment.getTeamUid());
-            System.out.println(attachment.isCanPvP());
-        }
+//        if (player.hasData(MTAttachmentTypes.TEAM)) {
+//            TeamAttachment attachment = player.getData(MTAttachmentTypes.TEAM);
+//            System.out.println(attachment.getTeamUid());
+//            System.out.println(attachment.isCanPvP());
+//        }
+        TeamManager teamManager = TeamManager.of(level);
+        System.out.println(teamManager);
     }
 
 

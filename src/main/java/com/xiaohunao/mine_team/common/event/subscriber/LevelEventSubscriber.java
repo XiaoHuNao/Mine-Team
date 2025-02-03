@@ -18,7 +18,6 @@ import java.util.UUID;
 public class LevelEventSubscriber {
     @SubscribeEvent
     public static void onCreateSpawnPosition(LevelEvent.CreateSpawnPosition event) {
-        
         ServerLevel serverLevel = (ServerLevel)event.getLevel();
         TeamManager teamManager = TeamManager.of(serverLevel);
 
@@ -26,9 +25,8 @@ public class LevelEventSubscriber {
             Arrays.stream(DyeColor.values())
                     .forEach(dyeColor -> {
                         teamManager.createTeam(UUID.randomUUID(), dyeColor);
-                        teamManager.setDirty();
                     });
         }
-
+        teamManager.setDirty();
     }
 }
