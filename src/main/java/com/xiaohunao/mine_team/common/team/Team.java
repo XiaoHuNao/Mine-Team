@@ -2,13 +2,9 @@ package com.xiaohunao.mine_team.common.team;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.UUID;
 
@@ -21,6 +17,8 @@ public class Team {
     );
     private UUID uid;
     private int color;
+    private int lastHurtByMobTimestamp;
+    private LivingEntity lastHurtByMob;
 
     public Team(UUID uid, int color) {
         this.uid = uid;
@@ -49,6 +47,19 @@ public class Team {
         this.uid = compoundTag.getUUID("uid");
         this.color = compoundTag.getInt("color");
         return this;
+    }
+
+    public int getLastHurtByMobTimestamp() {
+        return lastHurtByMobTimestamp;
+    }
+
+    public LivingEntity getLastHurtByMob() {
+        return lastHurtByMob;
+    }
+
+    public void setLastHurtByMob(LivingEntity livingEntity) {
+        this.lastHurtByMob = livingEntity;
+        this.lastHurtByMobTimestamp = livingEntity.tickCount;
     }
 
 }

@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "mine_team.refmap.json",
   "mixins": [
-    "LevelMixin"
+    "LevelMixin",
+    "MobMixin"
   ],
   "client": [
     "CreativeModeInventoryScreenMixin",

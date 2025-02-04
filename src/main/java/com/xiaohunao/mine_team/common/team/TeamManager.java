@@ -5,22 +5,20 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import com.xiaohunao.mine_team.MineTeam;
 import com.xiaohunao.mine_team.common.compat.LoadedCompat;
+import com.xiaohunao.mine_team.common.init.MTAttachmentTypes;
 import com.xiaohunao.mine_team.common.mixed.TeamManagerContainer;
-import com.xiaohunao.mine_team.common.network.TeamAttachmentSyncPayload;
 import com.xiaohunao.mine_team.common.network.TeamManagerSyncPayload;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 
@@ -128,5 +126,13 @@ public class TeamManager extends SavedData {
     }
     public DyeColor getDyeColor(Team team) {
         return dyeColorTeam.inverse().get(team);
+    }
+
+    public static Team getTeam(Entity entity) {
+        TeamManager manager = TeamManager.of(entity.level());
+        if (entity.hasData(MTAttachmentTypes.TEAM)) {
+            return manager.taems.get(entity.getData(MTAttachmentTypes.TEAM).getTeamUid());
+        }
+        return null;
     }
 }

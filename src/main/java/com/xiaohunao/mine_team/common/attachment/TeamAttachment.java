@@ -2,10 +2,8 @@ package com.xiaohunao.mine_team.common.attachment;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.xiaohunao.mine_team.common.team.Team;
 import net.minecraft.core.UUIDUtil;
 
-import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class TeamAttachment {

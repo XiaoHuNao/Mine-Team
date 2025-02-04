@@ -1,11 +1,8 @@
 package com.xiaohunao.mine_team.common.network;
 
 import com.xiaohunao.mine_team.MineTeam;
-import com.xiaohunao.mine_team.common.mixed.TeamManagerContainer;
 import com.xiaohunao.mine_team.common.team.TeamManager;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

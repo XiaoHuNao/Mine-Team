@@ -1,10 +1,7 @@
 package com.xiaohunao.mine_team.common.event.subscriber;
 
 import com.xiaohunao.mine_team.MineTeam;
-import com.xiaohunao.mine_team.common.compat.LoadedCompat;
-import com.xiaohunao.mine_team.common.team.Team;
 import com.xiaohunao.mine_team.common.team.TeamManager;
-import net.minecraft.ChatFormatting;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
 import net.neoforged.bus.api.SubscribeEvent;
