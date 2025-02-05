@@ -16,6 +16,9 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.Arrays;
+import java.util.UUID;
+
 @EventBusSubscriber(modid = MineTeam.MODID)
 public class PlayerEventSubscriber {
     @SubscribeEvent
@@ -23,6 +26,16 @@ public class PlayerEventSubscriber {
         Player player = event.getEntity();
         ServerLevel serverLevel = (ServerLevel)player.level();
         TeamManager teamManager = TeamManager.of(serverLevel);
+
+
+        if (teamManager.isTeamEmpty()){
+            Arrays.stream(DyeColor.values())
+                    .forEach(dyeColor -> {
+                        teamManager.createTeam(UUID.randomUUID(), dyeColor);
+                    });
+        }
+        teamManager.setDirty();
+
 
         if (!player.hasData(MTAttachmentTypes.TEAM)) {
             TeamAttachment attachment = player.getData(MTAttachmentTypes.TEAM);
