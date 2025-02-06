@@ -35,6 +35,9 @@ public class TeamRender {
         this.screen = screen;
     }
     public void renderTeamIcon(GuiGraphics guiGraphics, int mouseX, int mouseY,float partialTick){
+        if (teamIcon == null || teamPVPOff == null || teamPVPOn == null || teamSmallIcons.isEmpty()){
+            return;
+        }
         this.teamIcon.render(guiGraphics, mouseX, mouseY, partialTick);
         this.teamPVPOff.render(guiGraphics, mouseX, mouseY, partialTick);
         this.teamPVPOn.render(guiGraphics, mouseX, mouseY, partialTick);
