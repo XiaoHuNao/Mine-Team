@@ -62,17 +62,18 @@ public class TeamRender {
                 String teamColor = dyeColor.getName();
                 int iconSize = 16;
                 int off = 6;
-                this.teamIcon = new ImageButton(screen.leftPos - iconSize,screen.topPos, iconSize, iconSize, createWidgetSprites("team/" + teamColor + "_team_icon"),  button-> {
+                int firstOff = MineTeam.IS_CONFLUENCE_LOADED ? 22 : 0;
+                this.teamIcon = new ImageButton(screen.leftPos - iconSize,screen.topPos+firstOff, iconSize, iconSize, createWidgetSprites("team/" + teamColor + "_team_icon"),  button-> {
                     this.teamIcon.visible = false;
                     this.teamPVPOn.visible = false;
                     this.teamPVPOff.visible = false;
                     visibleTeamSmallIcon(true);
                 });
 
-                this.teamPVPOff = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize, iconSize,
+                this.teamPVPOff = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off + firstOff, iconSize, iconSize,
                         createWidgetSprites("team/pvp/" + teamColor + "_pvp_off"),
                         button-> setTeamPvP(localPlayer,true));
-                this.teamPVPOn = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off, iconSize, iconSize,
+                this.teamPVPOn = new ImageButton(screen.leftPos - iconSize,screen.topPos + iconSize + off + firstOff, iconSize, iconSize,
                         createWidgetSprites("team/pvp/" + teamColor + "_pvp_on"),
                         button-> setTeamPvP(localPlayer,false));
                 initSmallIcon(localPlayer);
@@ -88,12 +89,13 @@ public class TeamRender {
                 .toList().reversed();
 
         int size = 8;
+        int firstOff = MineTeam.IS_CONFLUENCE_LOADED ? 22 : 0;
         for (int i = 0; i < teamColors.size(); i++) {
             String newTeamColor = teamColors.get(i);
             int x = screen.leftPos - size -(i / 8) * size - (i / 8) * 2;
             int y = screen.topPos + (i % 8) * size + (i % 8) * 2;
 
-            ImageButton teamSmallIconBtn = new ImageButton(x, y, size, size, createWidgetSprites("team/small/" + newTeamColor + "_team_small_icon"),
+            ImageButton teamSmallIconBtn = new ImageButton(x, y + firstOff, size, size, createWidgetSprites("team/small/" + newTeamColor + "_team_small_icon"),
                     button -> teamSmallIconButtonPressed(localPlayer,newTeamColor));
             teamSmallIconBtn.visible = false;
             teamSmallIcons.put(newTeamColor, teamSmallIconBtn);
